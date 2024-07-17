@@ -1,0 +1,36 @@
+name: Send notificaiton email
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: ${{ github.workspace }}/.github/src
+        run: npm install
+
+      - name: Create or Update Repositories
+        uses: actions/github-script@v6
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+        with:
+          script: |
+            await import('${{ github.workspace }}/.github/src/sendgrid.js')
